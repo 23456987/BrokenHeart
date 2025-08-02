@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,18 @@ import {
   ActivityIndicator
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DeviceInfo from 'react-native-device-info';
 
 const SplashScreen = ({ navigation }) => {
+  const [version, setVersion] = useState('');
+
   useEffect(() => {
     let isMounted = true;
+
+    const getVersion = async () => {
+      const appVersion = await DeviceInfo.getVersion();
+      if (isMounted) setVersion(appVersion);
+    };
 
     const checkLogin = async () => {
       try {
@@ -31,6 +39,7 @@ const SplashScreen = ({ navigation }) => {
       }
     };
 
+    getVersion();
     checkLogin();
 
     return () => {
@@ -40,9 +49,13 @@ const SplashScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/images/brokenheart.jpg')} style={styles.logo} />
+      <Image
+        source={require('../assets/images/brokenheart.jpg')}
+        style={styles.logo}
+      />
       <ActivityIndicator size="large" color="#ff3366" />
       <Text style={styles.text}>Welcome to BrokenHeart ❤️</Text>
+      <Text style={styles.version}>Version {version}</Text>
     </View>
   );
 };
@@ -66,5 +79,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginTop: 15,
     fontSize: 16,
+  },
+  version: {
+    color: '#888',
+    marginTop: 5,
+    fontSize: 12,
   },
 });

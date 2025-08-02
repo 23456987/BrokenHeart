@@ -60,16 +60,17 @@ export default function YouScreen({ navigation }) {
   };
 
   const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('username');
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }], // 🔁 Replace with your actual login screen name
-      });
-    } catch (e) {
-      console.log('Logout error:', e);
-    }
-  };
+  try {
+    await AsyncStorage.clear(); // 🚨 This will remove ALL keys stored
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
+  } catch (e) {
+    console.log('Logout error:', e);
+  }
+};
+
   const getIcon = (title) => {
     const key = title.toLowerCase();
     if (key.includes('about')) return 'info';

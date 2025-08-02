@@ -66,9 +66,11 @@ export default function LoginScreen({ navigation }) {
 
       if (response.ok && result?.status !== 'error') {
         await AsyncStorage.setItem('username', email);
+        await AsyncStorage.setItem('firstname', result.first_name); // <-- add this if your API returns it
         await AsyncStorage.setItem('password', password);
 
-        Alert.alert('Success', 'Login successful!');
+      Alert.alert('Success', '❤️ Login successful!');
+
         navigation.navigate('Main');
       } else {
         const errorMessage = result?.message || 'Invalid credentials. Please try again.';

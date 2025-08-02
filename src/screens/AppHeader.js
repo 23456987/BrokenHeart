@@ -1,15 +1,23 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function AppHeader({
-  onBellPress,
-  searchText,
-  onSearchChange,
-  onSearchSubmit,
-  heartColor = 'crimson', // customizable heart color
-}) {
-  const [showSearch, setShowSearch] = useState(false);
+export default function AppHeader({ heartColor = 'crimson' }) {
+  const [firstName, setFirstName] = useState('');
+
+  useEffect(() => {
+    const loadName = async () => {
+      try {
+        const name = await AsyncStorage.getItem('firstname');
+        if (name) setFirstName(name);
+      } catch (err) {
+        console.log('Failed to load first name:', err);
+      }
+    };
+
+    loadName();
+  }, []);
 
   return (
     <View style={styles.header}>
@@ -20,30 +28,9 @@ export default function AppHeader({
       </View>
 
       <View style={styles.rightSection}>
-        {!showSearch && (
-          <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(true)}>
-            <Icon name="search" size={18} color="#fff" />
-          </TouchableOpacity>
+        {firstName !== '' && (
+          <Text style={styles.welcomeText}>Welcome, {firstName}</Text>
         )}
-
-        {showSearch && (
-          <View style={styles.searchContainer}>
-            <TextInput
-              autoFocus
-              style={styles.searchInput}
-              placeholder="Search stories, pain, healing..."
-              placeholderTextColor="#aaa"
-              value={searchText}
-              onChangeText={onSearchChange}
-              onSubmitEditing={onSearchSubmit}
-              returnKeyType="search"
-            />
-          </View>
-        )}
-
-        <TouchableOpacity style={styles.iconButton} onPress={onBellPress}>
-          <Icon name="bell" size={20} color="#fff" />
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -71,22 +58,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
-  iconButton: {
-    padding: 6,
-    marginLeft: 8,
-  },
-  searchContainer: {
-    backgroundColor: '#2c2c2c',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    height: 40,
-    justifyContent: 'center',
-    marginRight: 8,
-    width: 180,
-  },
-  searchInput: {
+  welcomeText: {
     color: '#fff',
-    flex: 1,
-    paddingVertical: 0,
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

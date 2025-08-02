@@ -75,7 +75,7 @@ export default function RegisterScreen({ navigation }) {
 
   return (
     <LinearGradient colors={['#000', 'crimson']} style={styles.container} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-      <Icon name="heart-broken" size={64} color="white" style={styles.icon} />
+      <Icon name="heart-broken" size={64} color="crimson" style={styles.icon} />
       <Text style={styles.title}>Welcome to BrokenHeart</Text>
 
       <TextInput style={styles.input} placeholder="Username" placeholderTextColor="#aaa" value={username} onChangeText={setUsername} />

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "842411168899",
+    "project_id": "stories-d964c",
+    "storage_bucket": "stories-d964c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:842411168899:android:d805da673c0bb9050bb7b6",
+        "android_client_info": {
+          "package_name": "com.brokenheart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfLd-d-D2T3yyztipJn8ag4oNVdLLf4yw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

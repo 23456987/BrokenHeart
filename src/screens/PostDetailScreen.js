@@ -26,7 +26,7 @@ export default function PostDetailScreen({ route }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const stopRequested = useRef(false);
   const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
-
+  // for translating
 
   useEffect(() => {
     const fetchPost = async () => {

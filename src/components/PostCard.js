@@ -9,14 +9,19 @@ import {
   Dimensions,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import CommentSection from '../screens/CommentSections'; // Adjust path if needed
+import CommentSection from '../screens/CommentSections';
+import useTranslator from '../screens/Translator';
 
 const { width } = Dimensions.get('window');
 
-export default function PostCard({ post, onPress }) {
-  const [translatedText, setTranslatedText] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [targetLang, setTargetLang] = useState(null);
+export default function PostCard({ post, onPress, playInCard = false }) {
+  const {
+    translatesText,
+    translatedText,
+    loading,
+    targetLang,
+  } = useTranslator();
+
   const [mediaLoading, setMediaLoading] = useState(true);
   const [commentVisible, setCommentVisible] = useState(false);
   const [muted, setMuted] = useState(true);
@@ -32,41 +37,12 @@ export default function PostCard({ post, onPress }) {
     const regex = /(?:youtube\.com\/.*v=|youtu\.be\/)([^&?/]+)/;
     const match = url.match(regex);
     if (match && match[1]) {
-      return `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=${muted ? 1 : 0}&playsinline=1&controls=1`;
+      return `https://www.youtube.com/embed/${match[1]}?autoplay=${playInCard ? 1 : 0}&mute=${muted ? 1 : 0}&playsinline=1&controls=1`;
     }
     return null;
   };
 
   const youTubeEmbedUrl = getYouTubeEmbedUrl(videoUrl);
-
-  const translateText = async (inputText, lang) => {
-    if (!inputText) return;
-
-    if (targetLang === lang && translatedText !== '') {
-      setTranslatedText('');
-      setTargetLang(null);
-      return;
-    }
-
-    const scriptUrl =
-      'https://script.google.com/macros/s/AKfycbxsKzumkEf5x0_XNIp0aJrJFsPxelsNmdyxtnBisvBLGDtVJEYn2q-aOnUrYA77Tjk/exec';
-    const url = `${scriptUrl}?text=${encodeURIComponent(inputText)}&target=${lang}`;
-
-    setTranslatedText('');
-    setLoading(true);
-    setTargetLang(lang);
-
-    try {
-      const response = await fetch(url);
-      const text = await response.text();
-      setTranslatedText(text);
-    } catch (error) {
-      console.error('Translation failed:', error);
-      setTranslatedText('Translation failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <View style={styles.card}>
@@ -102,7 +78,7 @@ export default function PostCard({ post, onPress }) {
               javaScriptEnabled
               domStorageEnabled
               allowsInlineMediaPlayback
-              mediaPlaybackRequiresUserAction={false}
+              mediaPlaybackRequiresUserAction={!playInCard}
               onLoadStart={() => setMediaLoading(true)}
               onLoadEnd={() => setMediaLoading(false)}
             />
@@ -117,7 +93,6 @@ export default function PostCard({ post, onPress }) {
             )
           )}
 
-          {/* Mute/Unmute Button */}
           {youTubeEmbedUrl && (
             <TouchableOpacity
               onPress={(e) => {
@@ -130,46 +105,37 @@ export default function PostCard({ post, onPress }) {
             </TouchableOpacity>
           )}
         </View>
-      </TouchableOpacity>
+      
 
       <View style={styles.textContainer}>
-        <Text style={styles.title}>
-          {post.title?.replace(/&#8211;/g, '–')}
-        </Text>
-
-        <Text style={styles.metaText}>
-          {author} | {date}
-        </Text>
-
-        <Text style={styles.excerpt} numberOfLines={3}>
-          {excerptText}
-        </Text>
+        <Text style={styles.title}>{post.title}</Text>
+        <Text style={styles.metaText}>{author} | {date}</Text>
+        <Text style={styles.excerpt} numberOfLines={3}>{excerptText}</Text>
 
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.translateButton}
-            onPress={() => translateText(excerptText, 'en')}
+            onPress={() => translatesText(excerptText, 'en')}
           >
             <Text style={styles.translateText}>Translate to English</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.translateButton}
-            onPress={() => translateText(excerptText, 'hi')}
+            onPress={() => translatesText(excerptText, 'hi')}
           >
             <Text style={styles.translateText}>Translate to Hindi</Text>
           </TouchableOpacity>
         </View>
-
-        {loading && (
-          <ActivityIndicator size="small" color="#aaa" style={{ marginTop: 8 }} />
-        )}
 
         {!!translatedText && (
           <Text style={styles.translatedText}>
             {targetLang === 'en' ? 'English: ' : 'Hindi: '}
             {translatedText}
           </Text>
+        )}
+        {loading && (
+          <ActivityIndicator size="small" color="#aaa" style={{ marginTop: 8 }} />
         )}
 
         <View style={{ marginTop: 12, alignItems: 'flex-end' }}>
@@ -179,12 +145,12 @@ export default function PostCard({ post, onPress }) {
         </View>
       </View>
 
-      {/* Comment Modal */}
       <CommentSection
         postId={post.id}
         isVisible={commentVisible}
         onClose={() => setCommentVisible(false)}
       />
+      </TouchableOpacity>
     </View>
   );
 }
