@@ -30,10 +30,38 @@ export default function PostDetailScreen() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [featuredPost, setFeaturedPost] = useState(null);
+
+// const checkLoginStatus = async () => {
+//   try {
+//    const userData = await AsyncStorage.getItem('userData');
+// console.log('userData:', userData);
+
+//     if (!userData) return false;
+
+//     const parsed = JSON.parse(userData);
+//     return parsed.username && parsed.firstname; // or any required fields
+//   } catch (err) {
+//     console.error('Error reading userData:', err);
+//     return false;
+//   }
+// };
+
 const checkLoginStatus = async () => {
-  const userData = await AsyncStorage.getItem('userData');
-  return !!userData; // returns true if logged in
+  try {
+    const userData = await AsyncStorage.getItem('userData');
+    if (!userData) return false;
+
+    const parsed = JSON.parse(userData);
+    console.log('Parsed login check:', parsed);
+
+    // ✅ Correct key names based on stored userData
+    return !!(parsed && parsed.username && parsed.first_name);
+  } catch (err) {
+    console.error('Error reading userData:', err);
+    return false;
+  }
 };
+
 
   useEffect(() => {
     fetchPosts();
@@ -65,8 +93,9 @@ const renderEpisode = useCallback(({ item, index }) => (
       const isPremium = item.is_premium?.includes('yes');
       const requiresLogin = item.need_login?.includes('yes');
 
-      if (isPremium && requiresLogin) {
+      if (isPremium || requiresLogin) {
         const isLoggedIn = await checkLoginStatus();
+        console.log('isPremium:', isPremium, 'requiresLogin:', requiresLogin, 'isLoggedIn:', isLoggedIn);
         if (!isLoggedIn) {
           Alert.alert('Login Required', 'Please login to view this premium content.');
           return;

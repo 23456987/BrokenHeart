@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Image,
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
@@ -14,30 +13,39 @@ import axios from 'axios';
 import ContactScreen from './ContactScreen';
 import ProfileIcon from 'react-native-vector-icons/FontAwesome';
 
-
 export default function YouScreen({ navigation }) {
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [userEmail, setUserEmail] = useState('');
-  const [userName, setUserName] = useState('');
+  const [userData, setUserData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-
 
   useEffect(() => {
     fetchUserData();
     fetchMenu();
   }, []);
 
-  const fetchUserData = async () => {
-    try {
-      const email = await AsyncStorage.getItem('username');
-      const name = email?.split('@')[0] || 'Guest';
-      setUserEmail(email);
-      setUserName(name.charAt(0).toUpperCase() + name.slice(1));
-    } catch (err) {
-      console.log('Failed to load user info:', err);
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchUserData();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+const fetchUserData = async () => {
+  try {
+    const storedUser = await AsyncStorage.getItem('userData');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      console.log('userData from AsyncStorage:', parsedUser); // 🔍 inspect this in debug log
+      setUserData(parsedUser);
+    } else {
+      setUserData(null);
     }
-  };
+  } catch (err) {
+    console.log('Failed to load userData:', err);
+    setUserData(null);
+  }
+};
 
   const fetchMenu = async () => {
     try {
@@ -48,7 +56,7 @@ export default function YouScreen({ navigation }) {
       if (Array.isArray(pages)) {
         setMenuItems(pages);
       } else {
-        console.warn('API did not return pages as an array:', response.data);
+        console.warn('API did not return pages as array:', response.data);
         setMenuItems([]);
       }
     } catch (error) {
@@ -60,16 +68,18 @@ export default function YouScreen({ navigation }) {
   };
 
   const handleLogout = async () => {
-  try {
-    await AsyncStorage.clear(); // 🚨 This will remove ALL keys stored
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Login' }],
-    });
-  } catch (e) {
-    console.log('Logout error:', e);
-  }
-};
+    try {
+      await AsyncStorage.removeItem('userData');
+      setUserData(null);
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Main' }],
+      });
+    } catch (e) {
+      console.log('Logout error:', e);
+    }
+  };
 
   const getIcon = (title) => {
     const key = title.toLowerCase();
@@ -83,13 +93,16 @@ export default function YouScreen({ navigation }) {
     return 'arrow-forward';
   };
 
+  const displayName = userData?.first_name || 'Guest';
+  const displayEmail = userData?.email || '';
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.profileSection}>
         <ProfileIcon name="user-circle" size={40} color="#555" style={styles.avatar} />
         <View>
-          <Text style={styles.name}>{userName}</Text>
-          <Text style={styles.email}>{userEmail}</Text>
+          <Text style={styles.name}>{displayName}</Text>
+          <Text style={styles.email}>{displayEmail}</Text>
         </View>
       </View>
 
@@ -104,7 +117,7 @@ export default function YouScreen({ navigation }) {
               onPress={() => {
                 const titleLower = item.title.toLowerCase();
                 if (titleLower.includes('contact')) {
-                  setModalVisible(true); // Show contact form popup
+                  setModalVisible(true);
                 } else {
                   navigation.navigate('PageScreen', {
                     title: item.title,
@@ -118,16 +131,25 @@ export default function YouScreen({ navigation }) {
             </TouchableOpacity>
           ))}
 
-          
-          {/* 🔒 Logout Button */}
-          <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-            <Icon name="logout" size={24} style={styles.menuIcon} />
-            <Text style={styles.menuText}>Logout</Text>
-          </TouchableOpacity>
+          {/* 🔐 Login / Logout */}
+          {userData ? (
+            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+              <Icon name="logout" size={24} style={styles.menuIcon} />
+              <Text style={styles.menuText}>Logout</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigation.navigate('Login')}
+            >
+              <Icon name="login" size={24} style={styles.menuIcon} />
+              <Text style={styles.menuText}>Login</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
 
-      {/* ✅ Contact Form Modal */}
+      {/* 📩 Contact Modal */}
       <ContactScreen visible={modalVisible} onClose={() => setModalVisible(false)} />
     </ScrollView>
   );
@@ -145,14 +167,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: '#222',
   },
-
   avatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
     marginRight: 10,
   },
-
   name: {
     color: '#fff',
     fontSize: 18,

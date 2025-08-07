@@ -41,48 +41,54 @@ export default function LoginScreen({ navigation }) {
       ])
     ).start();
   };
+const handleLogin = async () => {
+  if (!email || !password) {
+    Alert.alert('Error', 'Please enter both email and password.');
+    return;
+  }
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password.');
-      return;
-    }
+  setLoading(true);
+  startPulse();
 
-    setLoading(true);
-    startPulse();
+  try {
+    const response = await fetch('https://brokenheart.in/wp-json/brokenheart-api/v1/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: email,
+        password: password,
+      }),
+    });
 
-    try {
-      const response = await fetch('https://brokenheart.in/wp-json/brokenheart-api/v1/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: email,
-          password: password,
-        }),
-      });
+    const result = await response.json();
+    console.log('Login response:', result);
 
-      const result = await response.json();
-      console.log('Login response:', result);
+    if (response.ok && result?.success) {
+      // ✅ Store only the useful fields
+      const userData = {
+        user_id: result.user_id,
+        username: result.username,
+        firstname: result.first_name,
+        display_name: result.display_name,
+        email: result.email,
+        role: result.role,
+      };
 
-      if (response.ok && result?.status !== 'error') {
-        await AsyncStorage.setItem('username', email);
-        await AsyncStorage.setItem('firstname', result.first_name); // <-- add this if your API returns it
-        await AsyncStorage.setItem('password', password);
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
 
       Alert.alert('Success', '❤️ Login successful!');
-
-        navigation.navigate('Main');
-      } else {
-        const errorMessage = result?.message || 'Invalid credentials. Please try again.';
-        Alert.alert('Login Failed', errorMessage);
-      }
-    } catch (error) {
-      console.log('Login error:', error);
-      Alert.alert('Error', 'Something went wrong. Please try again later.');
-    } finally {
-      setLoading(false);
+      navigation.navigate('Main'); // 👈 replace with actual post-login screen
+    } else {
+      const errorMessage = result?.message || 'Invalid credentials. Please try again.';
+      Alert.alert('Login Failed', errorMessage);
     }
-  };
+  } catch (error) {
+    console.log('Login error:', error);
+    Alert.alert('Error', 'Something went wrong. Please try again later.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <LinearGradient colors={['#000', 'crimson']} style={styles.container} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
