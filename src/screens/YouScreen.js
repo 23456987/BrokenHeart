@@ -32,7 +32,7 @@ export default function YouScreen({ navigation }) {
     try {
       const email = await AsyncStorage.getItem('username');
       const name = email?.split('@')[0] || 'Guest';
-      setUserEmail(email || 'guest@example.com');
+      setUserEmail(email);
       setUserName(name.charAt(0).toUpperCase() + name.slice(1));
     } catch (err) {
       console.log('Failed to load user info:', err);

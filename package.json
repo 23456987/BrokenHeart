@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@demfabris/react-native-snap-carousel": "^3.9.3",
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-firebase/app": "^22.4.0",
@@ -23,6 +24,7 @@
     "react-native": "0.80.2",
     "react-native-device-info": "^14.0.4",
     "react-native-dialog": "^9.3.0",
+    "react-native-fast-image": "^8.6.3",
     "react-native-gesture-handler": "^2.27.2",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-modal": "^14.0.0-rc.1",

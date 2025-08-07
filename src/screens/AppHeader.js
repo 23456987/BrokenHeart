@@ -1,66 +1,107 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
-export default function AppHeader({ heartColor = 'crimson' }) {
-  const [firstName, setFirstName] = useState('');
+export default function AppHeader() {
+  const [currentTime, setCurrentTime] = useState('');
+  const navigation = useNavigation();
 
   useEffect(() => {
-    const loadName = async () => {
-      try {
-        const name = await AsyncStorage.getItem('firstname');
-        if (name) setFirstName(name);
-      } catch (err) {
-        console.log('Failed to load first name:', err);
-      }
+    const updateTime = () => {
+      const now = new Date();
+      const dateString = now.toLocaleDateString('en-US', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+      const timeString = now.toLocaleTimeString('en-US');
+      setCurrentTime(`${dateString} - ${timeString}`);
     };
 
-    loadName();
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <View style={styles.header}>
-      <View style={styles.leftSection}>
-        <Text style={styles.title}>
-          Broken <Icon name="heart-broken" size={20} color={heartColor} /> Heart
+    <View style={styles.container}>
+      <View style={styles.topBar}>
+        <Text style={styles.timeText}>
+          <Icon name="calendar" size={14} color="#ccc" /> {currentTime}
         </Text>
+
+        <View style={styles.authButtons}>
+          <TouchableOpacity
+            style={styles.authLink}
+            onPress={() => navigation.navigate('Login')}>
+            <Icon name="sign-in-alt" size={14} color="#fff" />
+            <Text style={styles.authText}> Login</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.authLink}
+            onPress={() => navigation.navigate('Register')}>
+            <Icon name="user-plus" size={14} color="#fff" />
+            <Text style={styles.authText}> Register</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <View style={styles.rightSection}>
-        {firstName !== '' && (
-          <Text style={styles.welcomeText}>Welcome, {firstName}</Text>
-        )}
+      <View style={styles.logoContainer}>
+        <Text style={styles.logoText}>
+          Broken <Icon name="heart-broken" size={20} color="red" /> Stories
+        </Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    padding: 12,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#1e1e1e',
+  container: {
+    backgroundColor: '#121212',
+    paddingTop: 10,
+    paddingBottom: 6,
+    paddingHorizontal: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderColor: '#333',
   },
-  leftSection: {
-    flex: 1,
-  },
-  rightSection: {
+  topBar: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
+  timeText: {
+    fontSize: 13,
+    color: '#ccc',
   },
-  welcomeText: {
+  authButtons: {
+    flexDirection: 'row',
+  },
+  authLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 14,
+  },
+  authText: {
+    fontSize: 14,
     color: '#fff',
-    fontSize: 16,
+    marginLeft: 4,
     fontWeight: '500',
+  }, 
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  logoText: {
+    fontSize: 22,
+    fontWeight: 'bold', 
+    color: '#fff',
   },
 });

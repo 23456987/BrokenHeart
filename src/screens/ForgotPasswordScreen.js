@@ -40,7 +40,7 @@ export default function ForgotPasswordScreen({ navigation }) {
         Alert.alert('Failed', result?.message || 'Something went wrong.');
       }
     } catch (error) {
-      console.error('Forgot Password error:', error);
+      console.log('Forgot Password error:', error);
       Alert.alert('Error', 'Unable to reset password. Try again later.');
     }
   };

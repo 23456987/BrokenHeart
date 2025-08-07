@@ -6,46 +6,34 @@ import {
   StyleSheet,
   ActivityIndicator
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import DeviceInfo from 'react-native-device-info';
 
 const SplashScreen = ({ navigation }) => {
   const [version, setVersion] = useState('');
 
-  useEffect(() => {
-    let isMounted = true;
+useEffect(() => {
+  let isMounted = true;
 
-    const getVersion = async () => {
-      const appVersion = await DeviceInfo.getVersion();
-      if (isMounted) setVersion(appVersion);
-    };
+  const getVersion = async () => {
+    const appVersion = await DeviceInfo.getVersion();
+    if (isMounted) setVersion(appVersion);
+  };
 
-    const checkLogin = async () => {
-      try {
-        const username = await AsyncStorage.getItem('username');
-        const password = await AsyncStorage.getItem('password');
-
-        setTimeout(() => {
-          if (!isMounted) return;
-
-          if (username && password) {
-            navigation.replace('Main');
-          } else {
-            navigation.replace('Login');
-          }
-        }, 1500);
-      } catch (e) {
-        if (isMounted) navigation.replace('Login');
+  const navigateToMain = () => {
+    setTimeout(() => {
+      if (isMounted) {
+        navigation.replace('Main'); // 👈 Directly navigate to Main screen
       }
-    };
+    }, 1500);
+  };
 
-    getVersion();
-    checkLogin();
+  getVersion();
+  navigateToMain();
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  return () => {
+    isMounted = false;
+  };
+}, []);
 
   return (
     <View style={styles.container}>

@@ -9,7 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import CommentSection from '../screens/CommentSections';
+import CommentSection from '../screens/CommentSection';
 import useTranslator from '../screens/Translator';
 
 const { width } = Dimensions.get('window');

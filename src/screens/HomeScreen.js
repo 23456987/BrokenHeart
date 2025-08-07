@@ -1,154 +1,286 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
-  FlatList,
-  ActivityIndicator,
-  StyleSheet,
   Text,
+  StyleSheet,
+  StatusBar,
+  FlatList,
   TouchableOpacity,
+  Image,
+  ImageBackground,
   Dimensions,
-  SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
-import PostCard from '../components/PostCard';
-import { fetchPosts } from '../api/api';
+import Carousel from '@demfabris/react-native-snap-carousel';
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
-export default function HomeScreen({ navigation }) {
-  const [posts, setPosts] = useState([]);
-  const [filteredPosts, setFilteredPosts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('All');
+const carouselItems = [
+  {
+    id: '1',
+    title: 'విలన్ - హస్బండ్',
+    description:
+      'అభయు అనే అమ్మాయి లవ్ లో ఉన్నపుడు రిలేషన్ షిప్‌లో యార్క్ అనే టాక్సిక్ పర్సన్ తో బ్రేకప్ అయింది...',
+    image: require('../assets/images/butterfly.jpg'),
+  },
+  {
+    id: '2',
+    title: 'అందాల రాక్షసి',
+    description: 'ఒక అందమైన అమ్మాయి ప్రేమలో పడిన కథ...',
+    image: require('../assets/images/boat.png'),
+  },
+];
+
+export default function HomeScreen() {
+  const carouselRef = useRef(null);
+  const navigation = useNavigation();
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [categoryList, setCategoryList] = useState(['All']);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const response = await fetchPosts();
-        setPosts(response);
-        setFilteredPosts(response);
-
-        const categoriesSet = new Set();
-        response.forEach((post) => {
-          post.categories?.forEach((cat) => {
-            if (cat?.name) {
-              categoriesSet.add(cat.name);
-            }
-          });
-        });
-
-        setCategoryList(['All', ...Array.from(categoriesSet)]);
-      } catch (error) {
-        console.error('Failed to fetch posts:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getData();
+    fetchCategories();
   }, []);
 
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    if (category === 'All') {
-      setFilteredPosts(posts);
-    } else {
-      const filtered = posts.filter((post) =>
-        post.categories?.some((cat) => cat.name === category)
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get(
+        'https://brokenheart.in/wp-json/brokenheart-api/v1/get-posts/'
       );
-      setFilteredPosts(filtered);
+      const posts = res.data;
+
+      const categoryMap = new Map();
+
+      posts.forEach((post) => {
+        post.categories?.forEach((category) => {
+          if (!categoryMap.has(category.id)) {
+            categoryMap.set(category.id, {
+              id: category.id.toString(),
+              title: category.name,
+              image: { uri: post.featured_image },
+            });
+          }
+        });
+      });
+
+      const uniqueCategories = Array.from(categoryMap.values());
+      setCategories(uniqueCategories);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const renderCategoryItem = ({ item }) => (
+  const renderCarouselItem = ({ item }) => (
+    <View style={styles.carouselCard}>
+      <Image source={item.image} style={styles.carouselImage} resizeMode="cover" />
+      <View style={styles.carouselTextContainer}>
+        <Text style={styles.carouselTitle}>{item.title}</Text>
+        <Text style={styles.carouselDesc} numberOfLines={3}>
+          {item.description}
+        </Text>
+        <View style={styles.carouselButton}>
+          <Text style={styles.carouselButtonText}>అనుసంధానం తెలుసుకోండి</Text>
+        </View>
+      </View>
+    </View>
+  );
+
+  const renderCategory = ({ item }) => (
     <TouchableOpacity
-      onPress={() => handleCategorySelect(item)}
-      style={[
-        styles.categoryButton,
-        selectedCategory === item && styles.selectedCategoryButton,
-      ]}
-      activeOpacity={0.8}
+      style={styles.categoryCard}
+      onPress={() =>
+        navigation.navigate('PostDetail', {
+          categoryId: item.id,
+          title: item.title,
+        })
+      }
     >
-      <Text numberOfLines={1} ellipsizeMode="tail" style={styles.categoryText}>
-        {item}
-      </Text>
+      <Image source={item.image} style={styles.categoryImage} resizeMode="cover" />
+      <View style={styles.categoryInfo}>
+        <Text style={styles.categoryTitle}>{item.title}</Text>
+        <Text style={styles.readMoreText}>కథలు చదవండి →</Text>
+      </View>
     </TouchableOpacity>
   );
 
-  const renderPostItem = ({ item }) => (
-    <PostCard
-      post={item}
-      onPress={({ playVideo }) =>
-        navigation.navigate('PostDetail', { postId: item.id, playVideo })
-      }
-    />
-  );
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#ff4444" />
-      </SafeAreaView>
-    );
-  }
-
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        horizontal
-        data={categoryList}
-        renderItem={renderCategoryItem}
-        keyExtractor={(item) => item}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoryList}
-      />
-      <FlatList
-        data={filteredPosts}
-        renderItem={renderPostItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.postList}
-      />
-    </SafeAreaView>
+    <ImageBackground
+      source={require('../assets/images/heart_bg.jpeg')} // ✅ Update path as per your assets
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View>
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+        {loading ? (
+          <ActivityIndicator size="large" color="#FF6B6B" style={{ marginTop: 50 }} />
+        ) : (
+          <FlatList
+            ListHeaderComponent={
+              <>
+                <View style={styles.carouselContainer}>
+                  <Carousel
+                    ref={carouselRef}
+                    data={carouselItems}
+                    renderItem={renderCarouselItem}
+                    sliderWidth={width}
+                    itemWidth={width * 0.85}
+                    loop={true}
+                    autoplay={true}
+                    autoplayDelay={1000}
+                    autoplayInterval={3000}
+                  />
+                </View>
+                <View style={styles.headerSection}>
+                  <Text style={styles.mainHeading}>
+                    💔 Broken Heart Stories | Read Best Telugu Stories
+                  </Text>
+                  <Text style={styles.subHeading}>
+                    ప్రేమ, మోసం, వ్యథ, ఆకలి, గందం నిండి ఉన్న భావాలు... Broken హార్ట్ కథలతో మీ మనసును హత్తుకుంటాయి.
+                  </Text>
+                  <Text style={styles.categoryHeading}>📚 కేటగిరీలు</Text>
+                </View>
+              </>
+            }
+            data={categories}
+            keyExtractor={(item) => item.id}
+            renderItem={renderCategory}
+            numColumns={2}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.categoryList}
+            columnWrapperStyle={styles.rowSpacing}
+          />
+        )}
+      </View>
+    </ImageBackground>
   );
 }
 
+const CARD_MARGIN = 12;
+const CARD_WIDTH = (width - CARD_MARGIN * 3) / 2;
+
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
-    backgroundColor: '#000',
   },
-  loaderContainer: {
-    flex: 1,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
+  // overlay: {
+  //   flex: 1,
+  //   backgroundColor: 'rgba(18,18,18,0.85)', // semi-dark for readability
+  // },
+  carouselContainer: {
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  carouselCard: {
+    borderRadius: 18,
+    overflow: 'hidden',
+    backgroundColor: '#1f1f1f',
+  },
+  carouselImage: {
+    width: '100%',
+    height: 220,
+  },
+  carouselTextContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  
+    padding: 14,
+  },
+  carouselTitle: {
+    color: '#FF6B6B',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  carouselDesc: {
+    color: '#ddd',
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  carouselButton: {
+    marginTop: 10,
+    backgroundColor: '#6ba1ffff',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+  },
+  carouselButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  headerSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  mainHeading: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  subHeading: {
+    fontSize: 14,
+    color: 'black',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 25,
+    fontWeight: '800',
+  },
+  categoryHeading: {
+    fontSize: 18,
+    color: 'black',
+    fontWeight: 'bold',
+    marginBottom: 15,
   },
   categoryList: {
+    paddingHorizontal: CARD_MARGIN,
+    paddingBottom: 30,
+  },
+  rowSpacing: {
+    justifyContent: 'space-between',
+    marginBottom: CARD_MARGIN,
+  },
+  
+  categoryImage: {
+    width: '100%',
+    height: 110,
+  },
+  categoryInfo: {
     paddingVertical: 10,
-    paddingLeft: 10,
-  },
-  categoryButton: {
-    paddingHorizontal: 16,
-    height: 38,
-    borderRadius: 20,
-    backgroundColor: '#222',
-    borderWidth: 1,
-    borderColor: '#333',
-    justifyContent: 'center',
+    paddingHorizontal: 10,
     alignItems: 'center',
-    marginRight: 10,
   },
-  selectedCategoryButton: {
-    backgroundColor: '#ff4444',
-    borderColor: '#ff4444',
-  },
-  categoryText: {
-    color: '#fff',
-    fontSize: width * 0.035,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  postList: {
-    padding: 10,
-  },
+categoryCard: {
+  width: CARD_WIDTH,
+  backgroundColor: '#fff',
+  borderRadius: 16,
+  overflow: 'hidden',
+  marginBottom: CARD_MARGIN,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.2,
+  shadowRadius: 4,
+  elevation: 4, // for Android
+},
+
+categoryTitle: {
+  color: '#222', // changed from '#fff'
+  fontSize: 14,
+  fontWeight: 'bold',
+  marginBottom: 6,
+  textAlign: 'center',
+},
+readMoreText: {
+  color: 'red', // you can keep this as is
+  fontWeight: '800',
+  fontSize: 14,
+},
+
 });

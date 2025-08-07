@@ -77,7 +77,7 @@ export default function LoginScreen({ navigation }) {
         Alert.alert('Login Failed', errorMessage);
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.log('Login error:', error);
       Alert.alert('Error', 'Something went wrong. Please try again later.');
     } finally {
       setLoading(false);
