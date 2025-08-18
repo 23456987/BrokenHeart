@@ -17,31 +17,30 @@ import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
-const carouselItems = [
-  {
-    id: '1',
-    title: 'విలన్ - హస్బండ్',
-    description:
-      'అభయు అనే అమ్మాయి లవ్ లో ఉన్నపుడు రిలేషన్ షిప్‌లో యార్క్ అనే టాక్సిక్ పర్సన్ తో బ్రేకప్ అయింది...',
-    image: require('../assets/images/butterfly.jpg'),
-  },
-  {
-    id: '2',
-    title: 'అందాల రాక్షసి',
-    description: 'ఒక అందమైన అమ్మాయి ప్రేమలో పడిన కథ...',
-    image: require('../assets/images/boat.png'),
-  },
-];
 
 export default function HomeScreen() {
   const carouselRef = useRef(null);
   const navigation = useNavigation();
   const [categories, setCategories] = useState([]);
+  const [stories, setStories] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchStories();
     fetchCategories();
   }, []);
+  const fetchStories = async () => {
+    try {
+      const res = await axios.get(
+        'https://brokenheart.in/wp-json/brokenheart-api/v1/homepage-stories'
+      );
+      setStories(res.data); // API already returns array of stories
+    } catch (error) {
+      console.error('Error fetching stories:', error);
+    }
+  };
+
 
   const fetchCategories = async () => {
     try {
@@ -75,18 +74,32 @@ export default function HomeScreen() {
 
   const renderCarouselItem = ({ item }) => (
     <View style={styles.carouselCard}>
-      <Image source={item.image} style={styles.carouselImage} resizeMode="cover" />
+      <Image source={{ uri: item.image }} style={styles.carouselImage} resizeMode="cover" />
       <View style={styles.carouselTextContainer}>
         <Text style={styles.carouselTitle}>{item.title}</Text>
         <Text style={styles.carouselDesc} numberOfLines={3}>
-          {item.description}
+          {item.excerpt}
         </Text>
-        <View style={styles.carouselButton}>
-          <Text style={styles.carouselButtonText}>అనుసంధానం తెలుసుకోండి</Text>
-        </View>
+        <TouchableOpacity
+          style={styles.carouselButton}
+          onPress={() =>
+            navigation.navigate('PostDetail', {
+              categoryId: item.categories?.[0]?.id
+                ? item.categories[0].id.toString()   // case: posts API format
+                : item.categories?.[0]?.toString(),  // case: carousel API format (just ID)
+              title: item.title, // you can still pass category name if you map it later
+            })
+
+          }
+        >
+          <Text style={styles.carouselButtonText}>
+            {item.button_text}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
+
 
   const renderCategory = ({ item }) => (
     <TouchableOpacity
@@ -123,7 +136,7 @@ export default function HomeScreen() {
                 <View style={styles.carouselContainer}>
                   <Carousel
                     ref={carouselRef}
-                    data={carouselItems}
+                    data={stories}
                     renderItem={renderCarouselItem}
                     sliderWidth={width}
                     itemWidth={width * 0.85}
@@ -165,10 +178,6 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
   },
-  // overlay: {
-  //   flex: 1,
-  //   backgroundColor: 'rgba(18,18,18,0.85)', // semi-dark for readability
-  // },
   carouselContainer: {
     marginTop: 10,
     marginBottom: 20,
@@ -187,7 +196,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-  
+
     padding: 14,
   },
   carouselTitle: {
@@ -247,7 +256,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: CARD_MARGIN,
   },
-  
+
   categoryImage: {
     width: '100%',
     height: 110,
@@ -257,30 +266,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     alignItems: 'center',
   },
-categoryCard: {
-  width: CARD_WIDTH,
-  backgroundColor: '#fff',
-  borderRadius: 16,
-  overflow: 'hidden',
-  marginBottom: CARD_MARGIN,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.2,
-  shadowRadius: 4,
-  elevation: 4, // for Android
-},
+  categoryCard: {
+    width: CARD_WIDTH,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: CARD_MARGIN,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4, // for Android
+  },
 
-categoryTitle: {
-  color: '#222', // changed from '#fff'
-  fontSize: 14,
-  fontWeight: 'bold',
-  marginBottom: 6,
-  textAlign: 'center',
-},
-readMoreText: {
-  color: 'red', // you can keep this as is
-  fontWeight: '800',
-  fontSize: 14,
-},
+  categoryTitle: {
+    color: '#222', // changed from '#fff'
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  readMoreText: {
+    color: 'red', // you can keep this as is
+    fontWeight: '800',
+    fontSize: 14,
+  },
 
 });

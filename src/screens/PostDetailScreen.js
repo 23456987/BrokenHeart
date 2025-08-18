@@ -18,8 +18,6 @@ import { Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 
-
-
 const { width } = Dimensions.get('window');
 
 export default function PostDetailScreen() {
@@ -31,36 +29,21 @@ export default function PostDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [featuredPost, setFeaturedPost] = useState(null);
 
-// const checkLoginStatus = async () => {
-//   try {
-//    const userData = await AsyncStorage.getItem('userData');
-// console.log('userData:', userData);
+  const checkLoginStatus = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('userData');
+      if (!userData) return false;
 
-//     if (!userData) return false;
+      const parsed = JSON.parse(userData);
+      console.log('Parsed login check:', parsed);
 
-//     const parsed = JSON.parse(userData);
-//     return parsed.username && parsed.firstname; // or any required fields
-//   } catch (err) {
-//     console.error('Error reading userData:', err);
-//     return false;
-//   }
-// };
-
-const checkLoginStatus = async () => {
-  try {
-    const userData = await AsyncStorage.getItem('userData');
-    if (!userData) return false;
-
-    const parsed = JSON.parse(userData);
-    console.log('Parsed login check:', parsed);
-
-    // ✅ Correct key names based on stored userData
-    return !!(parsed && parsed.username && parsed.first_name);
-  } catch (err) {
-    console.error('Error reading userData:', err);
-    return false;
-  }
-};
+      // ✅ Correct key names based on stored userData
+      return !!(parsed && parsed.username && parsed.first_name);
+    } catch (err) {
+      console.error('Error reading userData:', err);
+      return false;
+    }
+  };
 
 
   useEffect(() => {
@@ -70,9 +53,19 @@ const checkLoginStatus = async () => {
   const fetchPosts = async () => {
     try {
       const res = await axios.get('https://brokenheart.in/wp-json/brokenheart-api/v1/get-posts/');
+      // const filtered = res.data.filter((item) =>
+      //   item.categories?.some((cat) => cat.id.toString() === categoryId)
+      // );
       const filtered = res.data.filter((item) =>
-        item.categories?.some((cat) => cat.id.toString() === categoryId)
-      );
+  item.categories?.some((cat) => {
+    // if cat is object -> compare cat.id
+    // if cat is number -> compare directly
+    return (typeof cat === 'object'
+      ? cat.id.toString()
+      : cat.toString()) === categoryId;
+  })
+);
+
 
       if (filtered.length > 0) {
         setFeaturedPost(filtered[0]);
@@ -86,53 +79,54 @@ const checkLoginStatus = async () => {
     }
   };
 
-const renderEpisode = useCallback(({ item, index }) => (
-  <TouchableOpacity
-    style={styles.episodeCard}
-    onPress={async () => {
-      const isPremium = item.is_premium?.includes('yes');
-      const requiresLogin = item.need_login?.includes('yes');
+  const renderEpisode = useCallback(({ item, index }) => (
+    <TouchableOpacity
+      style={styles.episodeCard}
+      onPress={async () => {
+        const isPremium = item.is_premium?.includes('yes');
+        const requiresLogin = item.need_login?.includes('yes');
 
-      if (isPremium || requiresLogin) {
-        const isLoggedIn = await checkLoginStatus();
-        console.log('isPremium:', isPremium, 'requiresLogin:', requiresLogin, 'isLoggedIn:', isLoggedIn);
-        if (!isLoggedIn) {
-          Alert.alert('Login Required', 'Please login to view this premium content.');
-          return;
+        if (isPremium && requiresLogin) {
+          const isLoggedIn = await checkLoginStatus();
+          console.log('isPremium:', isPremium, 'requiresLogin:', requiresLogin, 'isLoggedIn:', isLoggedIn);
+          if (!isLoggedIn) {
+            navigation.navigate('Login');
+            // Alert.alert('Login Required', 'Please login to view this premium content.');
+            return;
+          }
         }
-      }
 
-      navigation.navigate('EpisodeDetail', {
-        id: item.id,
-        title: item.title,
-        content: item.content,
-        date: item.date,
-        author: item.author,
-        image: item.featured_image,
-        video_link: item.video_link,
-      });
-    }}
-  >
-    <Image source={{ uri: item.featured_image }} style={styles.episodeImage} />
+        navigation.navigate('EpisodeDetail', {
+          id: item.id,
+          title: item.title,
+          content: item.content,
+          date: item.date,
+          author: item.author,
+          image: item.featured_image,
+          video_link: item.video_link,
+        });
+      }}
+    >
+      <Image source={{ uri: item.featured_image }} style={styles.episodeImage} />
 
-    <View style={styles.episodeContent}>
-      <Text style={styles.episodeTitle}>Episode {index + 1}</Text>
+      <View style={styles.episodeContent}>
+        <Text style={styles.episodeTitle}>Episode {index + 1}</Text>
 
-      {/* ✅ Add Premium Label below Episode number */}
-   {item.is_premium?.includes('yes') && (
-  <View style={styles.premiumLabelContainer}>
-  <Icon name="workspace-premium" size={14} color="black" style={{ marginRight: 4 }} />
-<Text style={styles.premiumLabel}>Premium</Text>
+        {/* ✅ Add Premium Label below Episode number */}
+        {item.is_premium?.includes('yes') && (
+          <View style={styles.premiumLabelContainer}>
+            <Icon name="workspace-premium" size={14} color="black" style={{ marginRight: 4 }} />
+            <Text style={styles.premiumLabel}>Premium</Text>
 
-  </View>
-)}
+          </View>
+        )}
 
-      <Text style={styles.episodeExcerpt} numberOfLines={3}>
-        {item.excerpt}
-      </Text>
-    </View>
-  </TouchableOpacity>
-), [navigation]);
+        <Text style={styles.episodeExcerpt} numberOfLines={3}>
+          {item.excerpt}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  ), [navigation]);
 
 
   const renderHeader = () => {
@@ -303,29 +297,29 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: 'black',
     lineHeight: 18,
-     fontWeight: '500',
+    fontWeight: '500',
   },
-premiumLabelContainer: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  alignSelf: 'flex-start',
-  backgroundColor: '#FFD700', // Brighter gold background
-  paddingVertical: 2,
-  paddingHorizontal: 8,
-  borderRadius: 12,
-  marginTop: 4,
-  marginBottom: 6,
-  elevation: 2, // For shadow on Android
-  shadowColor: '#000', // For iOS shadow
-  shadowOffset: { width: 1, height: 1 },
-  shadowOpacity: 0.2,
-  shadowRadius: 2,
-},
+  premiumLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFD700', // Brighter gold background
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    marginTop: 4,
+    marginBottom: 6,
+    elevation: 2, // For shadow on Android
+    shadowColor: '#000', // For iOS shadow
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
 
-premiumLabel: {
-  fontSize: 12,
-  fontWeight: '700',
-  color: '#000', // Black for contrast
-},
+  premiumLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#000', // Black for contrast
+  },
 
 });

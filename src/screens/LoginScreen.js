@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Text,
   TextInput,
@@ -22,6 +22,17 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const scaleAnim = useState(new Animated.Value(1))[0];
 
+  // ✅ Check if user already logged in
+  useEffect(() => {
+    const checkLogin = async () => {
+      const savedUser = await AsyncStorage.getItem('userData');
+      if (savedUser) {
+        navigation.replace('Main'); // already logged in → go to home screen
+      }
+    };
+    checkLogin();
+  }, [navigation]);
+
   const startPulse = () => {
     scaleAnim.setValue(1);
     Animated.loop(
@@ -41,63 +52,80 @@ export default function LoginScreen({ navigation }) {
       ])
     ).start();
   };
-const handleLogin = async () => {
-  if (!email || !password) {
-    Alert.alert('Error', 'Please enter both email and password.');
-    return;
-  }
 
-  setLoading(true);
-  startPulse();
-
-  try {
-    const response = await fetch('https://brokenheart.in/wp-json/brokenheart-api/v1/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: email,
-        password: password,
-      }),
-    });
-
-    const result = await response.json();
-    console.log('Login response:', result);
-
-    if (response.ok && result?.success) {
-      // ✅ Store only the useful fields
-      const userData = {
-        user_id: result.user_id,
-        username: result.username,
-        firstname: result.first_name,
-        display_name: result.display_name,
-        email: result.email,
-        role: result.role,
-      };
-
-      await AsyncStorage.setItem('userData', JSON.stringify(userData));
-
-      Alert.alert('Success', '❤️ Login successful!');
-      navigation.navigate('Main'); // 👈 replace with actual post-login screen
-    } else {
-      const errorMessage = result?.message || 'Invalid credentials. Please try again.';
-      Alert.alert('Login Failed', errorMessage);
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password.');
+      return;
     }
-  } catch (error) {
-    console.log('Login error:', error);
-    Alert.alert('Error', 'Something went wrong. Please try again later.');
-  } finally {
-    setLoading(false);
-  }
-};
+
+    setLoading(true);
+    startPulse();
+
+    try {
+      const response = await fetch('https://brokenheart.in/wp-json/brokenheart-api/v1/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: email,
+          password: password,
+        }),
+      });
+
+      const result = await response.json();
+      console.log('Login response:', result);
+
+      if (response.ok && result?.success) {
+        const userData = {
+          user_id: result.user_id,
+          username: result.username,
+          first_name: result.first_name,
+          display_name: result.display_name,
+          email: result.email,
+          role: result.role,
+          registered: result.registered,
+        };
+
+        await AsyncStorage.setItem('userData', JSON.stringify(userData));
+
+        Alert.alert('Success', '❤️ Login successful!');
+        navigation.navigate('Main'); 
+      } else {
+        const errorMessage = result?.message || 'Invalid credentials. Please try again.';
+        Alert.alert('Login Failed', errorMessage);
+      }
+    } catch (error) {
+      console.log('Login error:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <LinearGradient colors={['#000', 'crimson']} style={styles.container} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+    <LinearGradient
+      colors={['#000', 'crimson']}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.inner}
       >
+        {/* 🔙 Back Button */}
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Icon name="arrow-left" size={20} color="#fff" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+
         <Icon name="heart-broken" size={64} color="crimson" style={styles.icon} />
-        <Text style={styles.title}>Welcome Back</Text>
+
+        {/* ✅ Centered welcome text */}
+        <Text style={styles.title}>
+          Welcome to <Text style={styles.redBold}>Broken Heart Stories</Text>
+          {'\n'}Login to access exclusive stories and content
+        </Text>
 
         <TextInput
           style={styles.input}
@@ -160,14 +188,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backText: {
+    marginLeft: 5,
+    fontSize: 16,
+    color: '#fff',
+  },
   icon: {
     marginBottom: 16,
   },
   title: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 30,
+    textAlign: 'center',
   },
   input: {
     width: '100%',
@@ -214,5 +255,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginTop: 10,
     textDecorationLine: 'underline',
+  },
+  redBold: {
+    color: 'red',
+    fontWeight: 'bold',
   },
 });
