@@ -23,7 +23,6 @@ export default function AppNavigator() {
       <RootStack.Screen name="Main" component={MainTabsWithHeader} options={{ headerShown: false }} />
       <RootStack.Screen name="PostDetail" component={PostDetailScreen} options={{ title: 'Story' }} />
       <RootStack.Screen name="EpisodeDetail" component={EpisodeDetailScreen} options={{ title: 'Episodes' }} />
-
       <RootStack.Screen
         name="PageScreen"
         component={PageScreen}

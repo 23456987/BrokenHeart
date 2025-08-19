@@ -50,7 +50,7 @@ export default function RegisterScreen({ navigation }) {
       });
 
       const result = await response.json();
-      console.log('API raw result:', JSON.stringify(result, null, 2));
+      // console.log('API raw result:', JSON.stringify(result, null, 2));
 
       const isSuccess =
         response.ok &&
@@ -68,7 +68,7 @@ export default function RegisterScreen({ navigation }) {
         Alert.alert('Registration Failed', errorMsg);
       }
     } catch (error) {
-      console.log('Registration error:', error);
+      // console.log('Registration error:', error);
       Alert.alert('Error', 'Something went wrong. Please try again later.');
     }
   };

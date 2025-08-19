@@ -25,13 +25,13 @@ const fetchComments = async () => {
     const response = await fetch(`https://brokenheart.in/wp-json/brokenheart-api/v1/comments/${postId}`);
     const data = await response.json();
 
-    console.log('Fetched comments:', data);
+    // console.log('Fetched comments:', data);
 
     setComments(data?.comments || []);
     setCommentCount(data?.comments?.length || 0);
   } catch (error) {
-    console.log('Error fetching comments:', error);
-    Alert.alert('Error', 'Failed to fetch comments.');
+    // console.log('Error fetching comments:', error);
+    // Alert.alert('Error', 'Failed to fetch comments.');
   }
 };
 
@@ -43,8 +43,8 @@ const submitComment = async () => {
     const username = await AsyncStorage.getItem('username');
     const password = await AsyncStorage.getItem('password');
 
-    console.log('Username:', username);
-    console.log('Password:', password);
+    // console.log('Username:', username);
+    // console.log('Password:', password);
 
     if (!username || !password) {
       Alert.alert('Login Required', 'Please log in to post a comment.');
@@ -58,7 +58,7 @@ const submitComment = async () => {
       comment: commentText.trim(),
     };
 
-    console.log('Submitting comment with payload:', payload);
+    // console.log('Submitting comment with payload:', payload);
 
     const response = await fetch(`https://brokenheart.in/wp-json/brokenheart-api/v1/comment`, {
       method: 'POST',
@@ -69,7 +69,7 @@ const submitComment = async () => {
     });
 
     const data = await response.json();
-    console.log('Response:', data);
+    // console.log('Response:', data);
 
     if (!response.ok || !data.success) {
       throw new Error(data?.message || 'Failed to post comment.');
@@ -81,7 +81,7 @@ const submitComment = async () => {
     setCommentText('');
     fetchComments(); // Refresh list
   } catch (error) {
-    console.log('Error posting comment:', error);
+    // console.log('Error posting comment:', error);
     Alert.alert('Error', error.message || 'Failed to post comment.');
   } finally {
     setIsSubmitting(false);

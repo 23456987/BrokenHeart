@@ -12,7 +12,20 @@
           "package_name": "com.brokenheart"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "842411168899-38m2ugi3t6i2beojjt33t9ldj1as1fv1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.brokenheart",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "842411168899-r5v8hvr6l3k3fqbn5js6b3m0d4387q9u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBfLd-d-D2T3yyztipJn8ag4oNVdLLf4yw"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "842411168899-r5v8hvr6l3k3fqbn5js6b3m0d4387q9u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

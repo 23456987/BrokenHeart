@@ -29,7 +29,7 @@ export default function useTranslator() {
       const data = await response.text();
       setTranslatedText(data);
     } catch (error) {
-      console.log('Translation failed:', error);
+      // console.log('Translation failed:', error);
       setTranslatedText('Translation failed. Please try again.');
     } finally {
       setLoading(false);

@@ -43,7 +43,7 @@ export default function AppHeader() {
           setUserData(null);
         }
       } catch (err) {
-        console.log('Failed to load userData:', err);
+        // console.log('Failed to load userData:', err);
       }
     };
 
@@ -54,7 +54,7 @@ export default function AppHeader() {
   }, [navigation]);
 
   const displayName = userData?.first_name || 'Guest';
-  console.log("displayName:", displayName);
+  // console.log("displayName:", displayName);
 
   return (
     <View style={styles.container}>

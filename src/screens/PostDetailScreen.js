@@ -35,12 +35,12 @@ export default function PostDetailScreen() {
       if (!userData) return false;
 
       const parsed = JSON.parse(userData);
-      console.log('Parsed login check:', parsed);
+      // console.log('Parsed login check:', parsed);
 
       // ✅ Correct key names based on stored userData
       return !!(parsed && parsed.username && parsed.first_name);
     } catch (err) {
-      console.error('Error reading userData:', err);
+      // console.error('Error reading userData:', err);
       return false;
     }
   };
@@ -73,7 +73,7 @@ export default function PostDetailScreen() {
 
       setPosts(filtered);
     } catch (err) {
-      console.error('Failed to load post details', err);
+      // console.error('Failed to load post details', err);
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ export default function PostDetailScreen() {
 
         if (isPremium && requiresLogin) {
           const isLoggedIn = await checkLoginStatus();
-          console.log('isPremium:', isPremium, 'requiresLogin:', requiresLogin, 'isLoggedIn:', isLoggedIn);
+          // console.log('isPremium:', isPremium, 'requiresLogin:', requiresLogin, 'isLoggedIn:', isLoggedIn);
           if (!isLoggedIn) {
             navigation.navigate('Login');
             // Alert.alert('Login Required', 'Please login to view this premium content.');

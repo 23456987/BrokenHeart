@@ -36,13 +36,13 @@ const fetchUserData = async () => {
     const storedUser = await AsyncStorage.getItem('userData');
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      console.log('userData from AsyncStorage:', parsedUser); // 🔍 inspect this in debug log
+      // console.log('userData from AsyncStorage:', parsedUser); // 🔍 inspect this in debug log
       setUserData(parsedUser);
     } else {
       setUserData(null);
     }
   } catch (err) {
-    console.log('Failed to load userData:', err);
+    // console.log('Failed to load userData:', err);
     setUserData(null);
   }
 };
@@ -56,11 +56,11 @@ const fetchUserData = async () => {
       if (Array.isArray(pages)) {
         setMenuItems(pages);
       } else {
-        console.warn('API did not return pages as array:', response.data);
+        // console.warn('API did not return pages as array:', response.data);
         setMenuItems([]);
       }
     } catch (error) {
-      console.log('Failed to fetch menu items:', error);
+      // console.log('Failed to fetch menu items:', error);
       setMenuItems([]);
     } finally {
       setLoading(false);
@@ -77,7 +77,7 @@ const fetchUserData = async () => {
         routes: [{ name: 'Main' }],
       });
     } catch (e) {
-      console.log('Logout error:', e);
+      // console.log('Logout error:', e);
     }
   };
 

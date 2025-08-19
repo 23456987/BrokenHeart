@@ -30,7 +30,7 @@ export default function ForgotPasswordScreen({ navigation }) {
       });
 
       const result = await response.json();
-      console.log('Forgot Password response:', result);
+      // console.log('Forgot Password response:', result);
 
       if (response.ok && result?.status !== 'error') {
         Alert.alert('Success', result?.message || 'Reset link sent to your email.', [
@@ -40,7 +40,7 @@ export default function ForgotPasswordScreen({ navigation }) {
         Alert.alert('Failed', result?.message || 'Something went wrong.');
       }
     } catch (error) {
-      console.log('Forgot Password error:', error);
+      // console.log('Forgot Password error:', error);
       Alert.alert('Error', 'Unable to reset password. Try again later.');
     }
   };

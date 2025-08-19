@@ -37,7 +37,7 @@ export default function HomeScreen() {
       );
       setStories(res.data); // API already returns array of stories
     } catch (error) {
-      console.error('Error fetching stories:', error);
+      // console.error('Error fetching stories:', error);
     }
   };
 
@@ -66,7 +66,8 @@ export default function HomeScreen() {
       const uniqueCategories = Array.from(categoryMap.values());
       setCategories(uniqueCategories);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      // console.error('Error fetching categories:', error);
+      
     } finally {
       setLoading(false);
     }
