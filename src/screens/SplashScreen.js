@@ -38,7 +38,7 @@ useEffect(() => {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../assets/images/brokenheart.jpg')}
+        source={require('../assets/images/broken_heart.png')}
         style={styles.logo}
       />
       <ActivityIndicator size="large" color="#ff3366" />
@@ -58,8 +58,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 120,
+    height: 120,
     marginBottom: 20,
     resizeMode: 'contain',
   },

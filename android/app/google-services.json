@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "842411168899",
-    "project_id": "stories-d964c",
-    "storage_bucket": "stories-d964c.firebasestorage.app"
+    "project_number": "939312410171",
+    "project_id": "broken-f5a53",
+    "storage_bucket": "broken-f5a53.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:842411168899:android:d805da673c0bb9050bb7b6",
+        "mobilesdk_app_id": "1:939312410171:android:6d805b9f38f2f59b93f61e",
         "android_client_info": {
-          "package_name": "com.brokenheart"
+          "package_name": "com.brokenheartstoriesstories"
         }
       },
       "oauth_client": [
         {
-          "client_id": "842411168899-38m2ugi3t6i2beojjt33t9ldj1as1fv1.apps.googleusercontent.com",
+          "client_id": "939312410171-gk3n687m2i8vu90a4n66sg9109jdub7k.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.brokenheart",
-            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+            "package_name": "com.brokenheartstoriesstories",
+            "certificate_hash": "f93ceb732c19528e45c20bdb848aa35ebb6d8782"
           }
         },
         {
-          "client_id": "842411168899-r5v8hvr6l3k3fqbn5js6b3m0d4387q9u.apps.googleusercontent.com",
+          "client_id": "939312410171-0i5tk5rqolulpuftvnrss4chropoj50b.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBfLd-d-D2T3yyztipJn8ag4oNVdLLf4yw"
+          "current_key": "AIzaSyDaCROKNX78kWt0r3GyWn_qPYayi1DjeF4"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "842411168899-r5v8hvr6l3k3fqbn5js6b3m0d4387q9u.apps.googleusercontent.com",
+              "client_id": "939312410171-0i5tk5rqolulpuftvnrss4chropoj50b.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

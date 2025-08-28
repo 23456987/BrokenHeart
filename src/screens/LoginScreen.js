@@ -26,7 +26,7 @@ export default function LoginScreen({ navigation }) {
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
-        '842411168899-r5v8hvr6l3k3fqbn5js6b3m0d4387q9u.apps.googleusercontent.com',
+        '939312410171-0i5tk5rqolulpuftvnrss4chropoj50b.apps.googleusercontent.com',
       offlineAccess: true,
     });
 
@@ -35,7 +35,7 @@ export default function LoginScreen({ navigation }) {
         const savedUser = await AsyncStorage.getItem('userData');
         if (savedUser) navigation.replace('Main');
       } catch (err) {
-        console.log('AsyncStorage read error:', err);
+        // console.log('AsyncStorage read error:', err);
       }
     };
     checkLogin();
@@ -139,7 +139,7 @@ const handleGoogleLogin = async () => {
     Alert.alert('Success', 'Google Login successful!');
     navigation.replace('Main');
   } catch (error) {
-    console.log('Google Sign-in error:', error);
+    // console.log('Google Sign-in error:', error);
     Alert.alert('Error', `Google Sign-in failed: ${error.code || error.message}`);
   }
 };
