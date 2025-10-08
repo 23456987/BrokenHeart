@@ -124,10 +124,8 @@ export default function EpisodeScreen() {
   };
 
   return (
-    <ImageBackground
-      source={require("../assets/images/heart_bg.jpeg")}
+    <View
       style={styles.background}
-      resizeMode="cover"
     >
       <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
         {isYouTubeLink ? (
@@ -205,7 +203,7 @@ export default function EpisodeScreen() {
           speakText(lang);
         }}
       />
-    </ImageBackground>
+    </View>
   );
 }
 const styles = StyleSheet.create({

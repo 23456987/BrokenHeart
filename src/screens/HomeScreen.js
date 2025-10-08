@@ -121,10 +121,9 @@ export default function HomeScreen() {
   );
 
   return (
-    <ImageBackground
-      source={require('../assets/images/heart_bg.jpeg')} // ✅ Update path as per your assets
+    <View
       style={styles.background}
-      resizeMode="cover"
+     
     >
       <View>
         <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
@@ -168,7 +167,7 @@ export default function HomeScreen() {
           />
         )}
       </View>
-    </ImageBackground>
+    </View>
   );
 }
 

@@ -57,14 +57,14 @@ export default function PostDetailScreen() {
       //   item.categories?.some((cat) => cat.id.toString() === categoryId)
       // );
       const filtered = res.data.filter((item) =>
-  item.categories?.some((cat) => {
-    // if cat is object -> compare cat.id
-    // if cat is number -> compare directly
-    return (typeof cat === 'object'
-      ? cat.id.toString()
-      : cat.toString()) === categoryId;
-  })
-);
+        item.categories?.some((cat) => {
+          // if cat is object -> compare cat.id
+          // if cat is number -> compare directly
+          return (typeof cat === 'object'
+            ? cat.id.toString()
+            : cat.toString()) === categoryId;
+        })
+      );
 
 
       if (filtered.length > 0) {
@@ -173,10 +173,8 @@ export default function PostDetailScreen() {
   };
 
   return (
-    <ImageBackground
-      source={require('../assets/images/heart_bg.jpeg')}
+    <View
       style={styles.background}
-      resizeMode="cover"
     >
       <View style={styles.container}>
         {loading ? (
@@ -198,7 +196,7 @@ export default function PostDetailScreen() {
           </React.Fragment>
         )}
       </View>
-    </ImageBackground>
+    </View>
   );
 }
 
