@@ -112,37 +112,37 @@ export default function LoginScreen({ navigation }) {
       setLoading(false);
     }
   };
-const handleGoogleLogin = async () => {
-  try {
-    await GoogleSignin.hasPlayServices();
-    const userInfo = await GoogleSignin.signIn();
+  const handleGoogleLogin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
 
-    // Access user data correctly from userInfo.data.user
-    const user = userInfo?.data?.user;
-    if (!user?.id) {
-      Alert.alert('Error', 'Google Sign-in returned invalid user data.');
-      return;
+      // Access user data correctly from userInfo.data.user
+      const user = userInfo?.data?.user;
+      if (!user?.id) {
+        Alert.alert('Error', 'Google Sign-in returned invalid user data.');
+        return;
+      }
+
+      const userData = {
+        user_id: user.id,
+        username: user.email || '',
+        first_name: user.givenName || '',
+        display_name: user.name || '',
+        email: user.email || '',
+        role: 'google_user',
+        photo: user.photo || '',
+        registered: new Date().toISOString(),
+      };
+
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
+      Alert.alert('Success', 'Google Login successful!');
+      navigation.replace('Main');
+    } catch (error) {
+      // console.log('Google Sign-in error:', error);
+      Alert.alert('Error', `Google Sign-in failed: ${error.code || error.message}`);
     }
-
-    const userData = {
-      user_id: user.id,
-      username: user.email || '',
-      first_name: user.givenName || '',
-      display_name: user.name || '',
-      email: user.email || '',
-      role: 'google_user',
-      photo: user.photo || '',
-      registered: new Date().toISOString(),
-    };
-
-    await AsyncStorage.setItem('userData', JSON.stringify(userData));
-    Alert.alert('Success', 'Google Login successful!');
-    navigation.replace('Main');
-  } catch (error) {
-    // console.log('Google Sign-in error:', error);
-    Alert.alert('Error', `Google Sign-in failed: ${error.code || error.message}`);
-  }
-};
+  };
 
   return (
     <LinearGradient

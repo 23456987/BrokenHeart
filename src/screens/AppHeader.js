@@ -69,7 +69,7 @@ export default function AppHeader() {
               <Icon name="user" size={14} color="#fff" /> Welcome, {displayName}
             </Text>
           ) : (
-            <>
+            <React.Fragment >
               <TouchableOpacity
                 style={styles.authLink}
                 onPress={() => navigation.navigate('Login')}>
@@ -83,7 +83,7 @@ export default function AppHeader() {
                 <Icon name="user-plus" size={14} color="#fff" />
                 <Text style={styles.authText}> Register</Text>
               </TouchableOpacity>
-            </>
+            </React.Fragment>
           )}
         </View>
       </View>

@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import ContactScreen from './ContactScreen';
 import ProfileIcon from 'react-native-vector-icons/FontAwesome';
+import ChatBotWidget from '../chatbot/ChatBotWidget';  // 👈 Import chatbot widget
 
 export default function YouScreen({ navigation }) {
   const [menuItems, setMenuItems] = useState([]);
@@ -31,21 +32,19 @@ export default function YouScreen({ navigation }) {
     return unsubscribe;
   }, [navigation]);
 
-const fetchUserData = async () => {
-  try {
-    const storedUser = await AsyncStorage.getItem('userData');
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      // console.log('userData from AsyncStorage:', parsedUser); // 🔍 inspect this in debug log
-      setUserData(parsedUser);
-    } else {
+  const fetchUserData = async () => {
+    try {
+      const storedUser = await AsyncStorage.getItem('userData');
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUserData(parsedUser);
+      } else {
+        setUserData(null);
+      }
+    } catch (err) {
       setUserData(null);
     }
-  } catch (err) {
-    // console.log('Failed to load userData:', err);
-    setUserData(null);
-  }
-};
+  };
 
   const fetchMenu = async () => {
     try {
@@ -56,11 +55,9 @@ const fetchUserData = async () => {
       if (Array.isArray(pages)) {
         setMenuItems(pages);
       } else {
-        // console.warn('API did not return pages as array:', response.data);
         setMenuItems([]);
       }
     } catch (error) {
-      // console.log('Failed to fetch menu items:', error);
       setMenuItems([]);
     } finally {
       setLoading(false);
@@ -76,9 +73,7 @@ const fetchUserData = async () => {
         index: 0,
         routes: [{ name: 'Main' }],
       });
-    } catch (e) {
-      // console.log('Logout error:', e);
-    }
+    } catch (e) {}
   };
 
   const getIcon = (title) => {
@@ -97,61 +92,66 @@ const fetchUserData = async () => {
   const displayEmail = userData?.email || '';
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.profileSection}>
-        <ProfileIcon name="user-circle" size={40} color="#555" style={styles.avatar} />
-        <View>
-          <Text style={styles.name}>{displayName}</Text>
-          <Text style={styles.email}>{displayEmail}</Text>
+    <View style={{ flex: 1 }}>
+      <ScrollView style={styles.container}>
+        <View style={styles.profileSection}>
+          <ProfileIcon name="user-circle" size={40} color="#555" style={styles.avatar} />
+          <View>
+            <Text style={styles.name}>{displayName}</Text>
+            <Text style={styles.email}>{displayEmail}</Text>
+          </View>
         </View>
-      </View>
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#f00" style={{ marginTop: 20 }} />
-      ) : (
-        <View style={styles.menuContainer}>
-          {menuItems.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.menuItem}
-              onPress={() => {
-                const titleLower = item.title.toLowerCase();
-                if (titleLower.includes('contact')) {
-                  setModalVisible(true);
-                } else {
-                  navigation.navigate('PageScreen', {
-                    title: item.title,
-                    content: item.content,
-                  });
-                }
-              }}
-            >
-              <Icon name={getIcon(item.title)} size={24} style={styles.menuIcon} />
-              <Text style={styles.menuText}>{item.title}</Text>
-            </TouchableOpacity>
-          ))}
+        {loading ? (
+          <ActivityIndicator size="small" color="#f00" style={{ marginTop: 20 }} />
+        ) : (
+          <View style={styles.menuContainer}>
+            {menuItems.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.menuItem}
+                onPress={() => {
+                  const titleLower = item.title.toLowerCase();
+                  if (titleLower.includes('contact')) {
+                    setModalVisible(true);
+                  } else {
+                    navigation.navigate('PageScreen', {
+                      title: item.title,
+                      content: item.content,
+                    });
+                  }
+                }}
+              >
+                <Icon name={getIcon(item.title)} size={24} style={styles.menuIcon} />
+                <Text style={styles.menuText}>{item.title}</Text>
+              </TouchableOpacity>
+            ))}
 
-          {/* 🔐 Login / Logout */}
-          {userData ? (
-            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-              <Icon name="logout" size={24} style={styles.menuIcon} />
-              <Text style={styles.menuText}>Logout</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('Login')}
-            >
-              <Icon name="login" size={24} style={styles.menuIcon} />
-              <Text style={styles.menuText}>Login</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
+            {/* 🔐 Login / Logout */}
+            {userData ? (
+              <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+                <Icon name="logout" size={24} style={styles.menuIcon} />
+                <Text style={styles.menuText}>Logout</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => navigation.navigate('Login')}
+              >
+                <Icon name="login" size={24} style={styles.menuIcon} />
+                <Text style={styles.menuText}>Login</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
 
-      {/* 📩 Contact Modal */}
-      <ContactScreen visible={modalVisible} onClose={() => setModalVisible(false)} />
-    </ScrollView>
+        {/* 📩 Contact Modal */}
+        <ContactScreen visible={modalVisible} onClose={() => setModalVisible(false)} />
+      </ScrollView>
+
+      {/* 💬 Chatbot Widget Floating Button */}
+      <ChatBotWidget />
+    </View>
   );
 }
 

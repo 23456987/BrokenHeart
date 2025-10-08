@@ -8,6 +8,7 @@ import PageScreen from '../screens/PageScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import SplashScreen from '../screens/SplashScreen';
 import ContactScreen from '../screens/ContactScreen';
+import ChatBotWidget from '../chatbot/ChatBotWidget';
 import EpisodeDetailScreen from '../screens/EpisodeDetailScreen';
 
 const RootStack = createNativeStackNavigator();
@@ -18,6 +19,7 @@ export default function AppNavigator() {
       <RootStack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
       <RootStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
       <RootStack.Screen name="ContactScreen" component={ContactScreen} />
+      <RootStack.Screen name="ChatBotWidget" component={ChatBotWidget} />
       <RootStack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
       <RootStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Forgot Password' }} />
       <RootStack.Screen name="Main" component={MainTabsWithHeader} options={{ headerShown: false }} />
