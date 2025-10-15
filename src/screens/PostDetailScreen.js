@@ -8,26 +8,30 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
-  ImageBackground,
+  RefreshControl,
 } from 'react-native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import LinearGradient from 'react-native-linear-gradient';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
-
-const { width } = Dimensions.get('window');
 
 export default function PostDetailScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const { categoryId, title } = route.params;
+  const [refreshing, setRefreshing] = useState(false);
+
 
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [featuredPost, setFeaturedPost] = useState(null);
+const onRefresh = async () => {
+  setRefreshing(true);
+  await fetchPosts(); // call your existing fetchPosts function
+  setRefreshing(false);
+};
 
   const checkLoginStatus = async () => {
     try {
@@ -79,96 +83,108 @@ export default function PostDetailScreen() {
     }
   };
 
-  const renderEpisode = useCallback(({ item, index }) => (
-    <TouchableOpacity
-      style={styles.episodeCard}
-      onPress={async () => {
-        const isPremium = item.is_premium?.includes('yes');
-        const requiresLogin = item.need_login?.includes('yes');
+ const renderEpisode = useCallback(({ item, index }) => (
+  <TouchableOpacity
+    style={styles.episodeCard}
+    onPress={async () => {
+      const isPremium = item.is_premium?.includes('yes');
+      const requiresLogin = item.need_login?.includes('yes');
 
-        if (isPremium && requiresLogin) {
-          const isLoggedIn = await checkLoginStatus();
-          // console.log('isPremium:', isPremium, 'requiresLogin:', requiresLogin, 'isLoggedIn:', isLoggedIn);
-          if (!isLoggedIn) {
-            navigation.navigate('Login');
-            // Alert.alert('Login Required', 'Please login to view this premium content.');
-            return;
-          }
+      if (isPremium && requiresLogin) {
+        const isLoggedIn = await checkLoginStatus();
+        if (!isLoggedIn) {
+          navigation.navigate('Login');
+          return;
         }
+      }
 
-        navigation.navigate('EpisodeDetail', {
-          id: item.id,
-          title: item.title,
-          content: item.content,
-          date: item.date,
-          author: item.author,
-          image: item.featured_image,
-          video_link: item.video_link,
-        });
-      }}
-    >
-      <Image source={{ uri: item.featured_image }} style={styles.episodeImage} />
-
-      <View style={styles.episodeContent}>
-        <Text style={styles.episodeTitle}>Episode {index + 1}</Text>
-
-        {/* ✅ Add Premium Label below Episode number */}
-        {item.is_premium?.includes('yes') && (
-          <View style={styles.premiumLabelContainer}>
-            <Icon name="workspace-premium" size={14} color="black" style={{ marginRight: 4 }} />
-            <Text style={styles.premiumLabel}>Premium</Text>
-
-          </View>
-        )}
-
-        <Text style={styles.episodeExcerpt} numberOfLines={3}>
-          {item.excerpt}
+      navigation.navigate('EpisodeDetail', {
+        id: item.id,
+        title: item.title,
+        content: item.content,
+        date: item.date,
+        author: item.author,
+        image: item.featured_image,
+        video_link: item.video_link,
+      });
+    }}
+  >
+    <View style={styles.episodeContent}>
+      {/* Gradient background for title */}
+      <LinearGradient
+        colors={['#000000', '#b30000', '#4d0000']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{
+          borderRadius: 20,
+          paddingHorizontal: 10,
+          paddingVertical: 4,
+          marginBottom: 6,
+          alignSelf: 'flex-start',
+        }}
+      >
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'white' }}>
+          {item.title}
         </Text>
-      </View>
-    </TouchableOpacity>
-  ), [navigation]);
+      </LinearGradient>
+
+      {item.is_premium?.includes('yes') && (
+        <View style={styles.premiumLabelContainer}>
+          <Icon name="workspace-premium" size={14} color="black" style={{ marginRight: 4 }} />
+          <Text style={styles.premiumLabel}>Premium</Text>
+        </View>
+      )}
+
+      <Text style={styles.episodeExcerpt} numberOfLines={3}>
+        {item.excerpt}
+      </Text>
+    </View>
+  </TouchableOpacity>
+), [navigation]);
 
 
   const renderHeader = () => {
     if (!featuredPost) return null;
 
     return (
-      <LinearGradient
-        colors={['#000000', '#b30000', '#4d0000']}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
+    <View style={styles.featuredCardWrapper}>
+  <LinearGradient
+    colors={['#000000', '#b30000', '#4d0000']}
+    start={{ x: 0.5, y: 0 }}
+    end={{ x: 0.5, y: 1 }}
+    style={styles.headerContainer}
+  >
+    <View style={styles.headerTop}>
+      <Image
+        source={{ uri: featuredPost.featured_image }}
+        style={styles.headerImage}
+      />
+      <View style={{ flex: 1, marginLeft: 12 }}>
+        <Text style={styles.headerTitle}>{featuredPost.title}</Text>
+        <Text style={styles.headerExcerpt} numberOfLines={3}>
+          {featuredPost.excerpt}
+        </Text>
+      </View>
+    </View>
 
+    <View style={styles.authorSection}>
+      <Image
+        source={{
+          uri: 'https://brokenheart.in/wp-content/uploads/2025/04/490127761_647266971372439_3574315247564411426_n.jpg',
+        }}
+        style={styles.authorAvatar}
+      />
+      <Text style={styles.authorName}>Sravana Sandhya</Text>
+    </View>
 
-        style={styles.headerContainer}
-      >
-        <View style={styles.headerTop}>
-          <Image
-            source={{ uri: featuredPost.featured_image }}
-            style={styles.headerImage}
-          />
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.headerTitle}>{featuredPost.title}</Text>
-            <Text style={styles.headerExcerpt} numberOfLines={3}>
-              {featuredPost.excerpt}
-            </Text>
-          </View>
-        </View>
+    <View style={styles.metaRow}>
+      <Text style={styles.metaItem}>📚 {posts.length} Episodes</Text>
+      <Text style={styles.metaItem}>👁️ {featuredPost.views || 0} Views</Text>
+      <Text style={styles.metaItem}>💬 {featuredPost.comments || 0} Comments</Text>
+    </View>
+  </LinearGradient>
+</View>
 
-        <View style={styles.authorSection}>
-          <Image
-            // source={{ uri: featuredPost.author_image }}
-            source={{ uri: 'https://i.pravatar.cc/100' }} // Author avatar or random image
-            style={styles.authorAvatar}
-          />
-          <Text style={styles.authorName}>Sravana Sandhya</Text>
-        </View>
-
-        <View style={styles.metaRow}>
-          <Text style={styles.metaItem}>📚 {posts.length} Episodes</Text>
-          <Text style={styles.metaItem}>👁️ {featuredPost.views || 0} Views</Text>
-          <Text style={styles.metaItem}>💬 {featuredPost.comments || 0} Comments</Text>
-        </View>
-      </LinearGradient>
     );
   };
 
@@ -191,6 +207,14 @@ export default function PostDetailScreen() {
                 ListHeaderComponent={renderHeader}
                 contentContainerStyle={{ paddingBottom: 50 }}
                 showsVerticalScrollIndicator={false}
+                refreshControl={
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      tintColor="#FF6B6B" // Spinner color for iOS
+      colors={['#FF6B6B']} // Spinner color for Android
+    />
+  }
               />
             )}
           </React.Fragment>
@@ -201,7 +225,7 @@ export default function PostDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  background: {
+background: {
     flex: 1,
   },
   container: {
@@ -209,115 +233,120 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    marginTop: 40,
-    fontSize: 16,
+    marginTop: hp('5%'),   // responsive
+    fontSize: wp('4%'),    // responsive font
     color: '#fff',
   },
   headerContainer: {
-    //  backgroundColor: '#2D1B3C', // Dark purple-gray, sleek and elegant
-    borderBottomLeftRadius: 17,
-    borderBottomRightRadius: 17,
-    padding: 14,
-    marginBottom: 20,
+    borderBottomLeftRadius: wp('4%'),   // responsive
+    borderBottomRightRadius: wp('4%'),
+    padding: wp('3%'),
+    marginBottom: hp('2.5%'),
   },
   headerTop: {
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
   headerImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 12,
+    width: wp('18%'),
+    height: wp('18%'),
+    borderRadius: wp('3%'),
     resizeMode: 'cover',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: wp('5%'),
     fontWeight: 'bold',
     color: '#FFD700',
-    marginBottom: 6,
+    marginBottom: hp('1%'),
   },
   headerExcerpt: {
-    fontSize: 13,
+    fontSize: wp('3.5%'),
     color: '#eee',
   },
   authorSection: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: hp('2.5%'),
   },
   authorAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: wp('14%'),
+    height: wp('14%'),
+    borderRadius: wp('7%'),
     borderWidth: 2,
     borderColor: '#fff',
   },
   authorName: {
-    fontSize: 16,
+    fontSize: wp('4%'),
     fontWeight: 'bold',
     color: '#fff',
-    marginTop: 6,
+    marginTop: hp('0.5%'),
   },
   metaRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: 16,
+    marginTop: hp('2%'),
   },
   metaItem: {
-    fontSize: 13,
+    fontSize: wp('3.5%'),
     color: '#ccc',
   },
   episodeCard: {
     backgroundColor: '#ffffffee',
-    marginHorizontal: 16,
-    marginBottom: 14,
-    borderRadius: 12,
+    marginHorizontal: wp('4%'),
+    marginBottom: hp('2%'),
+    borderRadius: wp('3%'),
     overflow: 'hidden',
     elevation: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: hp('0.5%') },
     shadowOpacity: 0.25,
-    shadowRadius: 8,
-  },
-  episodeImage: {
-    width: '100%',
-    height: 210,
+    shadowRadius: wp('2%'),
   },
   episodeContent: {
-    padding: 12,
+    padding: wp('3%'),
+  },
+  featuredCardWrapper: {
+    marginHorizontal: wp('2%'),
+    marginBottom: hp('2.5%'),
+    borderRadius: wp('4%'),
+    overflow: 'hidden',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: hp('0.5%') },
+    shadowOpacity: 0.25,
+    shadowRadius: wp('1.5%'),
+    backgroundColor: '#000',
   },
   episodeTitle: {
-    fontSize: 16,
+    fontSize: wp('5%'),
     fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 6,
+    color: 'white',
+    marginBottom: hp('0.5%'),
   },
   episodeExcerpt: {
-    fontSize: 13,
+    fontSize: wp('4%'),
     color: 'black',
-    lineHeight: 18,
+    lineHeight: hp('2.5%'),
     fontWeight: '500',
   },
   premiumLabelContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: '#FFD700', // Brighter gold background
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    marginTop: 4,
-    marginBottom: 6,
-    elevation: 2, // For shadow on Android
-    shadowColor: '#000', // For iOS shadow
-    shadowOffset: { width: 1, height: 1 },
+    backgroundColor: '#FFD700',
+    paddingVertical: hp('0.5%'),
+    paddingHorizontal: wp('2%'),
+    borderRadius: wp('3%'),
+    marginTop: hp('0.5%'),
+    marginBottom: hp('1%'),
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: wp('0.3%'), height: hp('0.3%') },
     shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowRadius: wp('1%'),
   },
-
   premiumLabel: {
-    fontSize: 12,
+    fontSize: wp('3%'),
     fontWeight: '700',
-    color: '#000', // Black for contrast
+    color: '#000',
   },
-
 });

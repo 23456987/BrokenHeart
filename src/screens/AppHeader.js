@@ -8,6 +8,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 export default function AppHeader() {
   const [currentTime, setCurrentTime] = useState('');
@@ -43,7 +44,7 @@ export default function AppHeader() {
           setUserData(null);
         }
       } catch (err) {
-        // console.log('Failed to load userData:', err);
+        console.log('Failed to load userData:', err);
       }
     };
 
@@ -54,33 +55,33 @@ export default function AppHeader() {
   }, [navigation]);
 
   const displayName = userData?.first_name || 'Guest';
-  // console.log("displayName:", displayName);
 
   return (
     <View style={styles.container}>
+      {/* Top Bar */}
       <View style={styles.topBar}>
         <Text style={styles.timeText}>
-          <Icon name="calendar" size={14} color="#ccc" /> {currentTime}
+          <Icon name="calendar" size={wp('3%')} color="#ccc" /> {currentTime}
         </Text>
 
         <View style={styles.authButtons}>
           {userData ? (
             <Text style={styles.welcomeText}>
-              <Icon name="user" size={14} color="#fff" /> Welcome, {displayName}
+              <Icon name="user" size={wp('3%')} color="#fff" /> Welcome, {displayName}
             </Text>
           ) : (
-            <React.Fragment >
+            <React.Fragment>
               <TouchableOpacity
                 style={styles.authLink}
                 onPress={() => navigation.navigate('Login')}>
-                <Icon name="sign-in-alt" size={14} color="#fff" />
+                <Icon name="sign-in-alt" size={wp('3%')} color="#fff" />
                 <Text style={styles.authText}> Login</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.authLink}
                 onPress={() => navigation.navigate('Register')}>
-                <Icon name="user-plus" size={14} color="#fff" />
+                <Icon name="user-plus" size={wp('3%')} color="#fff" />
                 <Text style={styles.authText}> Register</Text>
               </TouchableOpacity>
             </React.Fragment>
@@ -88,9 +89,10 @@ export default function AppHeader() {
         </View>
       </View>
 
+      {/* Logo */}
       <View style={styles.logoContainer}>
         <Text style={styles.logoText}>
-          Broken <Icon name="heart-broken" size={20} color="red" /> Stories
+          Broken <Icon name="heart-broken" size={wp('4.5%')} color="red" /> Stories
         </Text>
       </View>
     </View>
@@ -100,9 +102,9 @@ export default function AppHeader() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#121212',
-    paddingTop: 10,
-    paddingBottom: 6,
-    paddingHorizontal: 14,
+    paddingTop: hp('1.5%'),
+    paddingBottom: hp('1%'),
+    paddingHorizontal: wp('4%'),
     borderBottomWidth: 1,
     borderColor: '#333',
   },
@@ -112,7 +114,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timeText: {
-    fontSize: 13,
+    fontSize: wp('3.5%'),
     color: '#ccc',
   },
   authButtons: {
@@ -122,28 +124,26 @@ const styles = StyleSheet.create({
   authLink: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 14,
+    marginLeft: wp('2%'),
   },
   authText: {
-    fontSize: 14,
+    fontSize: wp('3.5%'),
     color: '#fff',
-    marginLeft: 4,
+    marginLeft: wp('1%'),
     fontWeight: '500',
   },
   welcomeText: {
-    fontSize: 14,
+    fontSize: wp('3.5%'),
     color: '#fff',
     fontWeight: '500',
   },
   logoContainer: {
     alignItems: 'center',
-    marginTop: 6,
+    marginTop: hp('1%'),
   },
   logoText: {
-    fontSize: 22,
+    fontSize: wp('5.5%'),
     fontWeight: 'bold',
     color: '#fff',
   },
 });
-
-

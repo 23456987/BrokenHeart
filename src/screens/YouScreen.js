@@ -150,7 +150,7 @@ export default function YouScreen({ navigation }) {
       </ScrollView>
 
       {/* 💬 Chatbot Widget Floating Button */}
-      <ChatBotWidget />
+   
     </View>
   );
 }

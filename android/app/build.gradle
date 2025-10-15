@@ -82,15 +82,15 @@ android {
         applicationId "com.brokenheartstoriesstories"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9
-        versionName "1.5.3"
+        versionCode 37
+        versionName "1.8.0"
     }
     signingConfigs {
-        debug {
+        debug {  
             storeFile file('debug.keystore')
             storePassword 'android'
             keyAlias 'androiddebugkey'
-            keyPassword 'android'
+            keyPassword 'android' 
         }
         release {
             storeFile file(MYAPP_RELEASE_STORE_FILE)
@@ -98,9 +98,6 @@ android {
             keyAlias MYAPP_RELEASE_KEY_ALIAS
             keyPassword MYAPP_RELEASE_KEY_PASSWORD
         }
-
-        
-
     }
     buildTypes {
         debug {
@@ -129,7 +126,7 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
- implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
 
     // Add the dependencies for the Crashlytics NDK and Analytics libraries
     // When using the BoM, you don't specify versions in Firebase library dependencies

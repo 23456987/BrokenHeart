@@ -10,6 +10,7 @@ import SplashScreen from '../screens/SplashScreen';
 import ContactScreen from '../screens/ContactScreen';
 import ChatBotWidget from '../chatbot/ChatBotWidget';
 import EpisodeDetailScreen from '../screens/EpisodeDetailScreen';
+import TitleHeaderWithBack from './TitleHeaderWithBack';
 
 const RootStack = createNativeStackNavigator();
 
@@ -23,13 +24,29 @@ export default function AppNavigator() {
       <RootStack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
       <RootStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Forgot Password' }} />
       <RootStack.Screen name="Main" component={MainTabsWithHeader} options={{ headerShown: false }} />
-      <RootStack.Screen name="PostDetail" component={PostDetailScreen} options={{ title: 'Story' }} />
-      <RootStack.Screen name="EpisodeDetail" component={EpisodeDetailScreen} options={{ title: 'Episodes' }} />
       <RootStack.Screen
-        name="PageScreen"
-        component={PageScreen}
-        options={({ route }) => ({ title: route.params.title })}
+        name="PostDetail"
+        component={PostDetailScreen}
+        options={{
+          header: () => <TitleHeaderWithBack title="Stories" />,
+        }}
       />
+      <RootStack.Screen
+        name="EpisodeDetail"
+        component={EpisodeDetailScreen}
+        options={{
+          header: () => <TitleHeaderWithBack title="Episodes" />,
+        }}
+      />
+
+   <RootStack.Screen
+  name="PageScreen"
+  component={PageScreen}
+  options={({ route, navigation }) => ({
+    header: () => <TitleHeaderWithBack title={route.params.title} navigation={navigation} />,
+  })}
+/>
+
     </RootStack.Navigator>
   );
 }
